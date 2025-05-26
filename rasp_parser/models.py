@@ -67,13 +67,21 @@ class RASPMotor:
         times = [point.time for point in self.thrust_curve]
         thrusts = [point.thrust for point in self.thrust_curve]
 
-        # Create cubic spline (s=0 means interpolation, not smoothing)
-        spline = UnivariateSpline(times, thrusts, s=0)
+        # Need at least 4 points for cubic spline to work reliably
+        if len(self.thrust_curve) < 4:
+            return self._adaptive_simpsons_integration()
 
-        # Integrate the spline from start to end time
-        # The integral method returns the definite integral value
-        integral_value = spline.integral(times[0], times[-1])
-        return float(integral_value)
+        try:
+            # Create cubic spline (s=0 means interpolation, not smoothing)
+            spline = UnivariateSpline(times, thrusts, s=0)
+
+            # Integrate the spline from start to end time
+            # The integral method returns the definite integral value
+            integral_value = spline.integral(times[0], times[-1])
+            return float(integral_value)
+        except:
+            # Fallback to Simpson's if spline fails
+            return self._adaptive_simpsons_integration()
 
     def _adaptive_simpsons_integration(self) -> float:
         """
@@ -90,8 +98,10 @@ class RASPMotor:
         # Process pairs of intervals using Simpson's 1/3 rule
         while i + 2 < n:
             t0, f0 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t1, f1 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
-            t2, f2 = self.thrust_curve[i + 2].time, self.thrust_curve[i + 2].thrust
+            t1, f1 = self.thrust_curve[i +
+                                       1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i +
+                                       2].time, self.thrust_curve[i + 2].thrust
 
             # Simpson's 1/3 rule: ∫f(x)dx ≈ (h/3)[f(x₀) + 4f(x₁) + f(x₂)]
             h = (t2 - t0) / 2
@@ -101,7 +111,8 @@ class RASPMotor:
         # Handle remaining interval(s) with trapezoidal rule
         while i + 1 < n:
             t1, f1 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t2, f2 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i +
+                                       1].time, self.thrust_curve[i + 1].thrust
             total += (t2 - t1) * (f1 + f2) / 2
             i += 1
 
@@ -119,21 +130,26 @@ class RASPMotor:
         times = [point.time for point in self.thrust_curve]
         thrusts = [point.thrust for point in self.thrust_curve]
 
-        # Check bounds
+        # Check bounds - return - outside motor burn time
         if time < times[0] or time > times[-1]:
             return 0.0
 
-        if SCIPY_AVAILABLE and len(self.thrust_curve) >= 3:
-            spline = UnivariateSpline(times, thrusts, s=0)
-            return float(spline(time))
-        else:
-            # Linear interpolation fallback
-            for i in range(len(times) - 1):
-                if times[i] <= time <= times[i + 1]:
-                    t1, f1 = times[i], thrusts[i]
-                    t2, f2 = times[i + 1], thrusts[i + 1]
-                    return f1 + (f2 - f1) * (time - t1) / (t2 - t1)
-            return 0.0
+        if SCIPY_AVAILABLE and len(self.thrust_curve) >= 4:
+            try:
+                spline = UnivariateSpline(times, thrusts, s=0)
+                result = float(spline(time))
+                # Ensure no negative thrust values
+                return max(0.0, result)
+            except:
+                pass  # Fall through to linear interpolation
+
+        # Linear interpolation fallback
+        for i in range(len(times) - 1):
+            if times[i] <= time <= times[i + 1]:
+                t1, f1 = times[i], thrusts[i]
+                t2, f2 = times[i + 1], thrusts[i + 1]
+                return f1 + (f2 - f1) * (time - t1) / (t2 - t1)
+        return 0.0
 
     @property
     def peak_thrust(self) -> float:
@@ -207,8 +223,8 @@ class RASPMotor:
         info = (
             f"RASP Motor: {self.designation} by {self.manufacturer}\n"
             f"  Class: {self.impulse_class}\n"
-            f"  Diameter: {self.diameter}mm\n"
-            f"  Length: {self.length}mm\n"
+            f"  Diameter: {self.diameter:.0f}mm\n"
+            f"  Length: {self.length:.0f}mm\n"
             f"  Propellant Mass: {self.propellant_mass:.3f}kg\n"
             f"  Total Mass: {self.total_mass:.3f}kg\n"
             f"  Total Impulse: {self.total_impulse:.1f}Ns\n"
