@@ -1,4 +1,12 @@
-.vscode/*
+# Python
 __pycache__/
+build/
+dist/
 *.egg-info
+
+# Coverage reports
 .coverage
+
+# IDEs
+.vscode/
+.idea/
