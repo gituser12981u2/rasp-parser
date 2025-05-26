@@ -62,7 +62,8 @@ class RASPMotor:
     def _cubic_spline_integration(self) -> float:
         """
         Cubic spline integration using scipy - most accurate method
-        Creates a smooth cubic spline through the data points and integrates analytically
+        Creates a smooth cubic spline through the data points and integrates
+        analytically
         """
         times = [point.time for point in self.thrust_curve]
         thrusts = [point.thrust for point in self.thrust_curve]
@@ -79,7 +80,7 @@ class RASPMotor:
             # The integral method returns the definite integral value
             integral_value = spline.integral(times[0], times[-1])
             return float(integral_value)
-        except:
+        except (ValueError, RuntimeError, TypeError):
             # Fallback to Simpson's if spline fails
             return self._adaptive_simpsons_integration()
 
@@ -98,10 +99,8 @@ class RASPMotor:
         # Process pairs of intervals using Simpson's 1/3 rule
         while i + 2 < n:
             t0, f0 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t1, f1 = self.thrust_curve[i +
-                                       1].time, self.thrust_curve[i + 1].thrust
-            t2, f2 = self.thrust_curve[i +
-                                       2].time, self.thrust_curve[i + 2].thrust
+            t1, f1 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i + 2].time, self.thrust_curve[i + 2].thrust
 
             # Simpson's 1/3 rule: ∫f(x)dx ≈ (h/3)[f(x₀) + 4f(x₁) + f(x₂)]
             h = (t2 - t0) / 2
@@ -111,8 +110,7 @@ class RASPMotor:
         # Handle remaining interval(s) with trapezoidal rule
         while i + 1 < n:
             t1, f1 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t2, f2 = self.thrust_curve[i +
-                                       1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
             total += (t2 - t1) * (f1 + f2) / 2
             i += 1
 
@@ -140,7 +138,7 @@ class RASPMotor:
                 result = float(spline(time))
                 # Ensure no negative thrust values
                 return max(0.0, result)
-            except:
+            except (ValueError, RuntimeError, TypeError):
                 pass  # Fall through to linear interpolation
 
         # Linear interpolation fallback
