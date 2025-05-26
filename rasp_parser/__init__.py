@@ -31,12 +31,10 @@ __all__ = [
     "ThrustCurvePoint",
     "RASPParser",
     "MotorValidator",
-
     # Convenience functions
     "load_rasp_motor",
     "load_rasp_motors",
     "validate_motor",
-
     # Exceptions
     "RASPParseError",
     "RASPFileNotFoundError",
@@ -44,7 +42,6 @@ __all__ = [
     "RASPHeaderError",
     "RASPThrustCurveError",
     "RASPValidationError",
-
     # Metadata
     "__version__",
 ]
@@ -52,6 +49,7 @@ __all__ = [
 # Optional scipy status
 try:
     from scipy.interpolate import UnivariateSpline
+
     SCIPY_AVAILABLE = True
     del UnivariateSpline  # Clean up namespace
 except ImportError:

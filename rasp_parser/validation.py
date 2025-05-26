@@ -36,8 +36,8 @@ class MotorValidator:
 
         if strict and warnings:
             raise RASPValidationError(
-                f"Motor validation failed {len(warnings)} issues: " +
-                "; ".join(warnings)
+                f"Motor validation failed {len(warnings)} issues: "
+                + "; ".join(warnings)
             )
 
         return warnings
@@ -48,8 +48,7 @@ class MotorValidator:
         warnings = []
 
         if motor.total_mass <= motor.propellant_mass:
-            warnings.append(
-                "Total mass should be greater than propellant mass")
+            warnings.append("Total mass should be greater than propellant mass")
 
         if motor.diameter <= 0:
             warnings.append("Diameter should be positive")
@@ -72,8 +71,7 @@ class MotorValidator:
 
         # Reasonable ranges check
         if motor.diameter > 500:  # 500mm is very large
-            warnings.append(
-                f"Diameter ({motor.diameter}mm) seems unusually large")
+            warnings.append(f"Diameter ({motor.diameter}mm) seems unusually large")
 
         if motor.length > 5000:  # 5m is very long
             warnings.append(f"Length ({motor.length}mm) seems unusually long")
@@ -92,20 +90,19 @@ class MotorValidator:
         # Check for minimum data points
         if len(motor.thrust_curve) < 3:
             warnings.append(
-                f"Very sparse thrust curve data ({len(motor.thrust_curve)} "
-                "points)")
+                f"Very sparse thrust curve data ({len(motor.thrust_curve)} " "points)"
+            )
 
         # Check for monotonic time values
         times = [point.time for point in motor.thrust_curve]
         if times != sorted(times):
             warnings.append(
-                "Thrust curve time values are not "
-                "monotonically increasing")
+                "Thrust curve time values are not " "monotonically increasing"
+            )
 
         # Check if thrust curve starts at t=0 or near 0
         if times[0] > 0.1:
-            warnings.append(
-                f"Thrust curve starts at t={times[0]:.3f}s, not near zero")
+            warnings.append(f"Thrust curve starts at t={times[0]:.3f}s, not near zero")
 
         # Check if thrust curve ends at zero thrust
         if motor.thrust_curve[-1].thrust > 0.1:
@@ -114,20 +111,17 @@ class MotorValidator:
         # Check for negative values
         for i, point in enumerate(motor.thrust_curve):
             if point.time < 0:
-                warnings.append(
-                    f"Negative time value at point {i}: {point.time}s")
+                warnings.append(f"Negative time value at point {i}: {point.time}s")
             if point.thrust < 0:
-                warnings.append(
-                    f"Negative thrust value at point {i}: {point.thrust}N")
+                warnings.append(f"Negative thrust value at point {i}: {point.thrust}N")
 
         # Verify peak thrust matches curve
-        max_curve_thrust = max(
-            point.thrust for point in motor.thrust_curve)
-        if (abs(max_curve_thrust - motor.peak_thrust) >
-                0.01 * motor.peak_thrust):
+        max_curve_thrust = max(point.thrust for point in motor.thrust_curve)
+        if abs(max_curve_thrust - motor.peak_thrust) > 0.01 * motor.peak_thrust:
             warnings.append(
                 f"Peak thrust in header ({motor.peak_thrust:.1f}N) does"
-                f"not match curve maximum ({max_curve_thrust:.1f}N)")
+                f"not match curve maximum ({max_curve_thrust:.1f}N)"
+            )
 
         return warnings
 

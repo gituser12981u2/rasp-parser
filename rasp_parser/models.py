@@ -7,6 +7,7 @@ from typing import List
 
 try:
     from scipy.interpolate import UnivariateSpline
+
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
@@ -15,6 +16,7 @@ except ImportError:
 @dataclass
 class ThrustCurvePoint:
     """Represents a single point in the thrust curve (time, thrust)"""
+
     time: float
     thrust: float
 
@@ -25,6 +27,7 @@ class ThrustCurvePoint:
 @dataclass
 class RASPMotor:
     """Represents a complete RASP motor with all its data"""
+
     # Header information
     designation: str
     diameter: float  # mm
@@ -87,10 +90,8 @@ class RASPMotor:
         # Process pairs of intervals using Simpson's 1/3 rule
         while i + 2 < n:
             t0, f0 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t1, f1 = self.thrust_curve[i +
-                                       1].time, self.thrust_curve[i + 1].thrust
-            t2, f2 = self.thrust_curve[i +
-                                       2].time, self.thrust_curve[i + 2].thrust
+            t1, f1 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i + 2].time, self.thrust_curve[i + 2].thrust
 
             # Simpson's 1/3 rule: ∫f(x)dx ≈ (h/3)[f(x₀) + 4f(x₁) + f(x₂)]
             h = (t2 - t0) / 2
@@ -100,8 +101,7 @@ class RASPMotor:
         # Handle remaining interval(s) with trapezoidal rule
         while i + 1 < n:
             t1, f1 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t2, f2 = self.thrust_curve[i +
-                                       1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
             total += (t2 - t1) * (f1 + f2) / 2
             i += 1
 
@@ -204,18 +204,20 @@ class RASPMotor:
         return self.total_impulse / (self.propellant_mass * 9.80665)
 
     def __str__(self) -> str:
-        info = (f"RASP Motor: {self.designation} by {self.manufacturer}\n"
-                f"  Class: {self.impulse_class}\n"
-                f"  Diameter: {self.diameter}mm\n"
-                f"  Length: {self.length}mm\n"
-                f"  Propellant Mass: {self.propellant_mass:.3f}kg\n"
-                f"  Total Mass: {self.total_mass:.3f}kg\n"
-                f"  Total Impulse: {self.total_impulse:.1f}Ns\n"
-                f"  Peak Thrust: {self.peak_thrust:.1f}N\n"
-                f"  Burn Time: {self.burn_time:.2f}s\n"
-                f"  Thrust Points: {len(self.thrust_curve)}")
+        info = (
+            f"RASP Motor: {self.designation} by {self.manufacturer}\n"
+            f"  Class: {self.impulse_class}\n"
+            f"  Diameter: {self.diameter}mm\n"
+            f"  Length: {self.length}mm\n"
+            f"  Propellant Mass: {self.propellant_mass:.3f}kg\n"
+            f"  Total Mass: {self.total_mass:.3f}kg\n"
+            f"  Total Impulse: {self.total_impulse:.1f}Ns\n"
+            f"  Peak Thrust: {self.peak_thrust:.1f}N\n"
+            f"  Burn Time: {self.burn_time:.2f}s\n"
+            f"  Thrust Points: {len(self.thrust_curve)}"
+        )
 
         if SCIPY_AVAILABLE:
-            info += ' (scipy-enhanced)'
+            info += " (scipy-enhanced)"
 
         return info

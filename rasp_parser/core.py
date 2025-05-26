@@ -5,9 +5,12 @@ Core parsing functionality for RASP motor files
 from pathlib import Path
 from typing import List
 
-from rasp_parser.exceptions import (RASPFileNotFoundError, RASPHeaderError,
-                                    RASPParseError)
-from rasp_parser.models import RASPMotor, ThrustCurvePoint
+from .models import RASPMotor, ThrustCurvePoint
+from .exceptions import (
+    RASPParseError,
+    RASPFileNotFoundError,
+    RASPHeaderError,
+)
 
 
 class RASPParser:
@@ -25,7 +28,7 @@ class RASPParser:
             RASPMotor object with parsed data
 
         Raises:
-            RASPFileNotFoundError: If the file does not exist
+            RASPFileNotFoundError: If the file doesn't exist
             RASPParseError: If the file cannot be parsed
         """
         path = Path(file_path)
@@ -33,10 +36,12 @@ class RASPParser:
             raise RASPFileNotFoundError(f"RASP file not found: {file_path}")
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return RASPParser.parse_string(content)
         except Exception as e:
+            if isinstance(e, RASPParseError):
+                raise
             raise RASPParseError(
                 f"Failed to parse RASP file {file_path}: {str(e)}")
 
@@ -54,21 +59,23 @@ class RASPParser:
         Raises:
             RASPParseError: If the content cannot be parsed
         """
-        lines = content.strip().split('\n')
-        if not lines:
+        content = content.strip()
+        if not content:
             raise RASPParseError("Empty RASP file")
+
+        lines = content.split("\n")
 
         comments = []
         header_line = None
         thrust_data = []
 
         # Parse lines
-        for line in lines:
+        for line_num, line in enumerate(lines, 1):
             line = line.strip()
             if not line:
                 continue
 
-            if line.startswith(';'):
+            if line.startswith(";"):
                 # Comment line
                 comments.append(line[1:].strip())
             elif header_line is None:
@@ -83,7 +90,7 @@ class RASPParser:
                         thrust = float(parts[1])
                         thrust_data.append(ThrustCurvePoint(time, thrust))
                 except ValueError:
-                    # Skip lines that cannot be parsed as thrust data
+                    # Skip invalid lines silently
                     continue
 
         if header_line is None:
@@ -92,11 +99,7 @@ class RASPParser:
         # Parse header line
         motor_data = RASPParser._parse_header(header_line)
 
-        return RASPMotor(
-            **motor_data,
-            thrust_curve=thrust_data,
-            comments=comments
-        )
+        return RASPMotor(**motor_data, thrust_curve=thrust_data, comments=comments)
 
     @staticmethod
     def _parse_header(header_line: str) -> dict:
@@ -115,20 +118,19 @@ class RASPParser:
         header_parts = header_line.split()
         if len(header_parts) < 7:
             raise RASPHeaderError(
-                "Invalid header format: expected 7 fields, got "
-                f"{len(header_parts)}: {header_line}"
+                "Invalid header format: expected 7 fields, "
+                f"got {len(header_parts)}: {header_line}"
             )
 
         try:
             return {
-                'designation': header_parts[0],
-                'diameter': float(header_parts[1]),
-                'length': float(header_parts[2]),
-                'delays': header_parts[3],
-                'propellant_mass': float(header_parts[4]),  # kg
-                'total_mass': float(header_parts[5]),  # kg (initial weight)
-                'manufacturer': (header_parts[6] if len(header_parts) > 6
-                                 else "Unknown")
+                "designation": header_parts[0],
+                "diameter": float(header_parts[1]),
+                "length": float(header_parts[2]),
+                "delays": header_parts[3],
+                "propellant_mass": float(header_parts[4]),  # kg
+                "total_mass": float(header_parts[5]),  # kg (initial weight)
+                "manufacturer": header_parts[6] if len(header_parts) > 6 else "Unknown",
             }
         except (ValueError, IndexError) as e:
             raise RASPHeaderError(
@@ -138,12 +140,11 @@ class RASPParser:
 
 # Convenience functions
 def load_rasp_motor(file_path: str) -> RASPMotor:
-    """Load and parse and a RASP motor file"""
+    """Load and parse a RASP motor file"""
     return RASPParser.parse_file(file_path)
 
 
-def load_rasp_motors(directory: str,
-                     pattern: str = "*.eng") -> List[RASPMotor]:
+def load_rasp_motors(directory: str, pattern: str = "*.eng") -> List[RASPMotor]:
     """
     Load all RASP motor files from a directory
 

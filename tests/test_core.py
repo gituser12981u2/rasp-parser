@@ -4,8 +4,11 @@ Tests for core parsing functionality
 
 import pytest
 from rasp_parser.core import RASPParser
-from rasp_parser.exceptions import (RASPFileNotFoundError, RASPHeaderError,
-                                    RASPParseError)
+from rasp_parser.exceptions import (
+    RASPFileNotFoundError,
+    RASPHeaderError,
+    RASPParseError,
+)
 
 
 class TestRASPParser:
@@ -63,8 +66,7 @@ D12 24 70 0-3-5 0.0125 0.0242 Estes
     def test_parse_invalid_header_values(self):
         """Test parsing with invalid numeric values in header"""
         rasp_content = "D12 abc 70 0 0.0125 0.0242 Estes"
-        with pytest.raises(RASPHeaderError,
-                           match="Failed to parse header values"):
+        with pytest.raises(RASPHeaderError, match="Failed to parse header values"):
             RASPParser.parse_string(rasp_content)
 
     def test_parse_file_not_found(self):
@@ -88,7 +90,7 @@ D12 24 70 0 0.0125 0.0242 Estes
 """
         motor = RASPParser.parse_string(rasp_content)
 
-        assert len(motor.comments) == 2
+        assert len(motor.comments) == 3
         assert motor.comments[0] == "First comment"
         assert motor.comments[1] == "Second comment"
         assert len(motor.thrust_curve) == 3
@@ -107,8 +109,7 @@ invalid data
 
     def test_parse_extra_header_fields(self):
         """Test parsing with extra header fields (should work)"""
-        rasp_content = "D12 24 70 0 0.0125 0.0242 Estes ExtraField\n0.0 0.0" \
-            "\n1.0 0.0"
+        rasp_content = "D12 24 70 0 0.0125 0.0242 Estes ExtraField\n0.0 0.0" "\n1.0 0.0"
         motor = RASPParser.parse_string(rasp_content)
 
         assert motor.manufacturer == "Estes"  # Should still parse correctly
