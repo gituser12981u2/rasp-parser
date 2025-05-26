@@ -48,6 +48,7 @@ __all__ = [
 
 # Optional scipy status
 try:
+    # type: ignore[import-untyped]
     from scipy.interpolate import UnivariateSpline
 
     SCIPY_AVAILABLE = True
@@ -56,6 +57,6 @@ except ImportError:
     SCIPY_AVAILABLE = False
 
 
-def get_integration_method():
+def get_integration_method() -> str:
     """Return the active integration method"""
     return "cubic_spline" if SCIPY_AVAILABLE else "adaptive_simpson"
