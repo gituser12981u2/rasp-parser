@@ -48,7 +48,7 @@ __all__ = [
 
 # Optional scipy status
 try:
-    # type: ignore[import-untyped]
+    # type: ignore[import-not-found]
     from scipy.interpolate import UnivariateSpline
 
     SCIPY_AVAILABLE = True
