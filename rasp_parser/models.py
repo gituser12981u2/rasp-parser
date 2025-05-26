@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import List
 
 try:
-    # type: ignore[import-not-found]
     from scipy.interpolate import UnivariateSpline
 
     SCIPY_AVAILABLE = True
@@ -100,8 +99,10 @@ class RASPMotor:
         # Process pairs of intervals using Simpson's 1/3 rule
         while i + 2 < n:
             t0, f0 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t1, f1 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
-            t2, f2 = self.thrust_curve[i + 2].time, self.thrust_curve[i + 2].thrust
+            t1, f1 = self.thrust_curve[i +
+                                       1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i +
+                                       2].time, self.thrust_curve[i + 2].thrust
 
             # Simpson's 1/3 rule: ∫f(x)dx ≈ (h/3)[f(x₀) + 4f(x₁) + f(x₂)]
             h = (t2 - t0) / 2
@@ -111,7 +112,8 @@ class RASPMotor:
         # Handle remaining interval(s) with trapezoidal rule
         while i + 1 < n:
             t1, f1 = self.thrust_curve[i].time, self.thrust_curve[i].thrust
-            t2, f2 = self.thrust_curve[i + 1].time, self.thrust_curve[i + 1].thrust
+            t2, f2 = self.thrust_curve[i +
+                                       1].time, self.thrust_curve[i + 1].thrust
             total += (t2 - t1) * (f1 + f2) / 2
             i += 1
 
