@@ -2,8 +2,8 @@
 Core parsing functionality for RASP motor files
 """
 
-from pathlib import Path
 from typing import List
+from pathlib import Path
 
 from .models import RASPMotor, ThrustCurvePoint
 from .exceptions import (
@@ -66,7 +66,7 @@ class RASPParser:
 
         comments = []
         header_line = None
-        thrust_data = []
+        thrust_data: List[ThrustCurvePoint] = []
 
         # Parse lines
         for line_num, line in enumerate(lines, 1):

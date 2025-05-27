@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "rasp-parser"
 version = "1.0.0"
 authors = [
-    {name = "gituser12981u2", email = "119834691+gituser12981u2@users.noreply.github.com"},
+    {name = "gituser12981u2", email = "squarer.human-0t@icloud.com"},
 ]
 description = "A Python library for parsing RASP rocket motor data files"
 readme = "README.md"
@@ -72,6 +72,7 @@ python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
