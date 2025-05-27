@@ -8,7 +8,7 @@ when scipy is available, with fallback to Simpson's rule integration.
 
 __version__ = "1.0.0"
 __author__ = "gituser12981u2"
-__email__ = "119834691+gituser12981u2@users.noreply.github.com"
+__email__ = "squarer.human-0t@icloud.com"
 __license__ = "MIT"
 
 # Core imports

@@ -42,7 +42,8 @@ class RASPParser:
         except Exception as e:
             if isinstance(e, RASPParseError):
                 raise
-            raise RASPParseError(f"Failed to parse RASP file {file_path}: {str(e)}")
+            raise RASPParseError(
+                f"Failed to parse RASP file {file_path}: {str(e)}")
 
     @staticmethod
     def parse_string(content: str) -> RASPMotor:

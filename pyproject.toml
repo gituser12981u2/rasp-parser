@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "rasp-parser"
 version = "1.0.0"
 authors = [
-    {name = "gituser12981u2", email = "119834691+gituser12981u2@users.noreply.github.com"},
+    {name = "gituser12981u2", email = "squarer.human-0t@icloud.com"},
 ]
 description = "A Python library for parsing RASP rocket motor data files"
 readme = "README.md"
